@@ -20,7 +20,7 @@ P1(2:end-1) = 2*P1(2:end-1);
 f = Fs*(0:(L/2))/L;
 
 figure(2)
-plot(f,P2) 
+plot(f,P1) 
 title("Single-Sided Amplitude Spectrum of X(t)")
 xlabel("f (Hz)")
 ylabel("|P1(f)|")
