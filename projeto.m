@@ -2,7 +2,7 @@
 
 [y,Fs] = audioread("nota.wav");
 
-% Reprodução do audio
+% Reprodução do audio - descomentar linha abaixo
 % soundsc(y(:,1),Fs);
 
 % Duração do audio
@@ -65,27 +65,28 @@ ylabel("Amplitude")
 
 %% Transformada inversa do filtro da fundamental
 
-inversa = ifft(Y_f);            % Transformada inversa do sinal filtrado
+inversa = ifft(Y_f);            % Transformada inversa da fundamental
 inversa = real(inversa);        % Retirar a parte complexa residual do sinal
 
-inversa_1h = ifft(Y_1h);
+inversa_1h = ifft(Y_1h);        % Transformada inversa da primeira harmonica
 inversa_1h = real(inversa_1h);
 
-inversa_2h = ifft(Y_2h);
+inversa_2h = ifft(Y_2h);        % Transformada inversa da segunda harmonica
 inversa_2h = real(inversa_2h);
 
-inversa_3h = ifft(Y_3h);
+inversa_3h = ifft(Y_3h);        % Transformada inversa da terceira harmonica
 inversa_3h = real(inversa_3h);
 
-inversa_4h = ifft(Y_4h);
+inversa_4h = ifft(Y_4h);        % Transformada inversa da quarta harmonica
 inversa_4h = real(inversa_4h);
 
+% Plot de algumas componentes
 figure(5)
 hold on
-%plot(t_audio,y(:,1))
+plot(t_audio,y(:,1))
 plot(t_audio,inversa)
-%plot(t_audio,inversa_1h)
-%plot(t_audio,inversa_2h)
+plot(t_audio,inversa_1h)
+plot(t_audio,inversa_2h)
 legend("Original", "Fundamental", "1 Harmonica", "2 Harmonica")
 xlabel("Tempo [s]")
 ylabel("Amplitude")
@@ -94,4 +95,47 @@ xlim([t_audio(1), t_audio(end)])
 %% Reprodução do audio filtrado
 
 audio_filtrado = inversa + inversa_1h + inversa_2h + inversa_3h + inversa_4h;
+
+% Descomentar essa linha para ouvir o som filtrado
 %soundsc(audio_filtrado,Fs);
+
+%% Sintetização
+
+f = fundamental; % Frequência da componente fundamental
+
+[A1, I1, A2, I2] = picos(t_audio, inversa, Fs, f); % Detecção dos picos
+y_f_sint = sintetizacao(t_audio,f,A1,I1,A2,I2); % Sintetização da frequencia fundamental
+
+f = fundamental*2; % Frequência da primeira harmonica
+
+[A1, I1, A2, I2] = picos(t_audio, inversa_1h, Fs, f); % Detecção dos picos
+y_1h_sint = sintetizacao(t_audio,f,A1,I1,A2,I2); % Sintetização da frequencia fundamental
+
+f = fundamental*3; % Frequência da segunda harmonica
+
+[A1, I1, A2, I2] = picos(t_audio, inversa_2h, Fs, f); % Detecção dos picos
+y_2h_sint = sintetizacao(t_audio,f,A1,I1,A2,I2); % Sintetização da frequencia fundamental
+
+f = fundamental*4; % Frequência da terceira harmonica
+
+[A1, I1, A2, I2] = picos(t_audio, inversa_3h, Fs, f); % Detecção dos picos
+y_3h_sint = sintetizacao(t_audio,f,A1,I1,A2,I2); % Sintetização da frequencia fundamental
+
+
+% Plot só para visualizar as harmonicas sintetizadas
+% Caso desejar, trocar os termos y para visualização
+figure(7)
+hold on
+plot(t_audio,inversa_3h)
+plot(t_audio,y_3h_sint)
+legend("Original", "Sintetizado")
+xlabel("Tempo [s]")
+ylabel("Amplitude")
+xlim([t_audio(1), t_audio(end)])
+
+%% Som sintetizado final
+
+y_sint = y_f_sint + y_1h_sint + y_2h_sint + y_3h_sint;
+
+% Descomentar a linha para ouvir o som
+% soundsc(y_sint, Fs)
