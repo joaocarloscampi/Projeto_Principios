@@ -1,6 +1,7 @@
 %% Leitura do audio
 
 [y,Fs] = audioread("nota.wav");
+%[y,Fs] = audioread("la_violao_solto_3.wav");
 
 % Reprodução do audio - descomentar linha abaixo
 % soundsc(y(:,1),Fs);
@@ -30,6 +31,22 @@ plot(f,P1)
 title("Espectro de magnitude do audio")
 xlabel("f (Hz)")
 ylabel("Amplitude")
+
+%phase = angle(Y);
+%phase = phase(:,1);                   % Separação do primeiro canal de audio
+%phase1 = phase(1:L/2+1);               % Separação do espectro positivo de frequências
+%phase1(2:end-1) = 2*phase1(2:end-1);
+
+%figure(20)
+%plot(f,phase1)
+%title("Espectro de fase do audio")
+%xlabel("f (Hz)")
+%ylabel("Fase")
+
+%i_phase_f = 2837;
+%i_phase_1h = 5674;
+%i_phase_2h = 8509;
+
 
 %% Espectro de frequência do audio completo
 
@@ -97,37 +114,38 @@ xlim([t_audio(1), t_audio(end)])
 audio_filtrado = inversa + inversa_1h + inversa_2h + inversa_3h + inversa_4h;
 
 % Descomentar essa linha para ouvir o som filtrado
-%soundsc(audio_filtrado,Fs);
+% soundsc(audio_filtrado,Fs);
+% audiowrite("audio_filtrado.wav",audio_filtrado,Fs);
 
 %% Sintetização
 
 f = fundamental; % Frequência da componente fundamental
 
 [A1, I1, A2, I2] = picos(t_audio, inversa, Fs, f); % Detecção dos picos
-y_f_sint = sintetizacao(t_audio,f,A1,I1,A2,I2); % Sintetização da frequencia fundamental
+y_f_sint = sintetizacao(t_audio,f,A1,I1,A2,I2, 0); % Sintetização da frequencia fundamental
 
 f = fundamental*2; % Frequência da primeira harmonica
 
 [A1, I1, A2, I2] = picos(t_audio, inversa_1h, Fs, f); % Detecção dos picos
-y_1h_sint = sintetizacao(t_audio,f,A1,I1,A2,I2); % Sintetização da frequencia fundamental
+y_1h_sint = sintetizacao(t_audio,f,A1,I1,A2,I2, 0); % Sintetização da frequencia fundamental
 
 f = fundamental*3; % Frequência da segunda harmonica
 
 [A1, I1, A2, I2] = picos(t_audio, inversa_2h, Fs, f); % Detecção dos picos
-y_2h_sint = sintetizacao(t_audio,f,A1,I1,A2,I2); % Sintetização da frequencia fundamental
+y_2h_sint = sintetizacao(t_audio,f,A1,I1,A2,I2, 0); % Sintetização da frequencia fundamental
 
 f = fundamental*4; % Frequência da terceira harmonica
 
 [A1, I1, A2, I2] = picos(t_audio, inversa_3h, Fs, f); % Detecção dos picos
-y_3h_sint = sintetizacao(t_audio,f,A1,I1,A2,I2); % Sintetização da frequencia fundamental
+y_3h_sint = sintetizacao(t_audio,f,A1,I1,A2,I2, 0); % Sintetização da frequencia fundamental
 
 
 % Plot só para visualizar as harmonicas sintetizadas
 % Caso desejar, trocar os termos y para visualização
-figure(7)
+figure(8)
 hold on
-plot(t_audio,inversa_3h)
-plot(t_audio,y_3h_sint)
+plot(t_audio,inversa_1h)
+plot(t_audio,y_1h_sint)
 legend("Original", "Sintetizado")
 xlabel("Tempo [s]")
 ylabel("Amplitude")
@@ -138,4 +156,31 @@ xlim([t_audio(1), t_audio(end)])
 y_sint = y_f_sint + y_1h_sint + y_2h_sint + y_3h_sint;
 
 % Descomentar a linha para ouvir o som
-% soundsc(y_sint, Fs)
+%soundsc(y_sint, Fs)
+%audiowrite("audio_sintetizado.wav",y_sint*2,Fs);
+
+figure(8)
+plot(t_audio, y(:,1))
+hold on
+plot(t_audio, y_sint)
+legend("Original", "Sintetizado")
+xlabel("Tempo [s]")
+ylabel("Amplitude")
+xlim([t_audio(1), t_audio(end)])
+
+%% Transformada do sinal sintetizado
+
+Y_sint = fft(y_sint);                     % Transformada de Fourier do audio
+
+P2_sint = abs(Y_sint/L);                  % Normalização dos dados
+%P2_sint = P2_sint(:,1);                   % Separação do primeiro canal de audio
+P1_sint = P2_sint(1:L/2+1);               % Separação do espectro positivo de frequências
+P1_sint(2:end-1) = 2*P1_sint(2:end-1);
+
+f = Fs*(0:(L/2))/L;             % Frequências do espectro dividid
+
+figure(9)
+plot(f,P1_sint) 
+title("Espectro de magnitude do audio sintetizado")
+xlabel("f (Hz)")
+ylabel("Amplitude")

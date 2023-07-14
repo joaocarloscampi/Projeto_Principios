@@ -7,10 +7,17 @@ dados_cortado = dados(indice:end);                      %
 
 n_picos = floor((tempo(end)-tempo(indice))/(1/f));
 
-picos = findpeaks(dados_cortado);
+[picos, indices] = findpeaks(dados_cortado);
 
 dados_ordenados = sort(picos, 'descend');
 maximo_10 = dados_ordenados(10);
 indice_10 = find(dados_cortado==maximo_10)+indice;
+
+%maximo = picos(100);
+%indice = indices(100);
+
+%maximo_10 = picos(250);
+%indice_10 = indices(250);
+
 end
 
