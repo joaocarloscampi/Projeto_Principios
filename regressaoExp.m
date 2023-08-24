@@ -16,11 +16,11 @@ fun = @(x,tempo_picos)x(1)*exp(x(2)*tempo_picos);
 x0 = [max(picos), -2];
 x = lsqcurvefit(fun,x0,tempo_picos,picos)
 
-figure(fig)
-hold on
-time = linspace(tempo_picos(1), tempo_picos(end));
-stem(tempo_picos, picos)
-plot(time, fun(x,time))
+%figure(fig)
+%hold on
+%time = linspace(tempo_picos(1), tempo_picos(end));
+%stem(tempo_picos, picos)
+%plot(time, fun(x,time))
 
 Amplitude = x(1);
 Expoente = x(2);

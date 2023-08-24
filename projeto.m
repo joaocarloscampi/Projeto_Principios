@@ -2,6 +2,7 @@
 clc
 clear all
 close all
+
 %% Parametros do algoritmo
 n_harmonicas = 16;                   % Numero de harmonicas desejado
 banda = 140;                        % Largura de banda do filtro
@@ -13,8 +14,8 @@ estrategia = 1;
 
 %% Leitura do audio
 
-%[y,Fs] = audioread("nota.wav");
-[y,Fs] = audioread("la_violao_solto_3.wav");
+[y,Fs] = audioread("nota.wav");
+%[y,Fs] = audioread("la_violao_solto_3.wav");
 
 % Reprodução do audio - descomentar linha abaixo
 soundsc(y(:,1),Fs);
@@ -25,6 +26,8 @@ t_audio = 0:(1/Fs):((length(y)-1)/Fs);
 figure(1)
 plot(t_audio, y(:,1))
 title("Audio original")
+xlabel("Tempo [s]")
+ylabel("Amplitude")
 xlim([t_audio(1), t_audio(end)])
 
 %% Espectro de frequência do audio positivo
@@ -42,8 +45,9 @@ f = Fs*(0:(L/2))/L;             % Frequências do espectro dividido
 figure(2)
 plot(f,P1) 
 title("Espectro de magnitude do audio")
-xlabel("f (Hz)")
-ylabel("Amplitude")
+xlabel("Frequência (Hz)")
+ylabel("Magnitude")
+grid on
 
 %phase = angle(Y);
 %phase = phase(:,1);                   % Separação do primeiro canal de audio
@@ -91,6 +95,8 @@ end
 title("Filtragem da primeira fundamental - Espectro completo")
 xlabel("f (Hz)")
 ylabel("Amplitude")
+legend("Fundamental", "1º Harmonica", "2º Harmonica", "3º Harmonica", "4º Harmonica", "5º Harmonica")
+grid on
 
 %% Transformada inversa do filtro da fundamental
 
@@ -159,6 +165,9 @@ if estrategia==1
     f = fundamental; % Frequência da componente fundamental
 
     [amplitude, zeta] = regressaoExp(t_audio, inversa, 100);
+    fprintf("Componente  Fundamental\n");
+    fprintf("a=%f\n",amplitude);
+    fprintf("zeta=%f\n",zeta/(2*pi*f));
     y_f_sint = real(sintetizacaoRegressao(amplitude, zeta, f, angle(componentes(1)), t_audio));
     
     %figure(200)
@@ -174,6 +183,9 @@ if estrategia==1
         f = harmonicas(i); % Frequência da harmonica
     
         [amplitude, zeta] = regressaoExp(t_audio, inversa_h(i,:), 100+i);
+        %fprintf("Componente  %d\n",i);
+        %fprintf("a=%f\n",amplitude);
+        %fprintf("zeta=%f\n",zeta/(2*pi*f));
         y_h_sint(i,:) = real(sintetizacaoRegressao(amplitude, zeta, f, angle(componentes(i+1)), t_audio)); % Sintetização da harmonica
     end
 end
@@ -198,15 +210,16 @@ end
 
 % Descomentar a linha para ouvir o som
 soundsc(y_sint, Fs)
-%audiowrite("audio_sintetizado.wav",y_sint*2,Fs);
+%audiowrite("audio_sintetizado_flauta.wav",y_sint*2,Fs);
 
 figure(9)
-plot(t_audio, y(:,1))
+%plot(t_audio, y(:,1))
 hold on
 plot(t_audio, y_sint)
-legend("Original", "Sintetizado")
+%legend("Original", "Sintetizado")
 xlabel("Tempo [s]")
 ylabel("Amplitude")
+title("Audio sintetizado")
 xlim([t_audio(1), t_audio(end)])
 
 %% Transformada do sinal sintetizado
@@ -225,3 +238,4 @@ plot(f,P1_sint)
 title("Espectro de magnitude do audio sintetizado")
 xlabel("f (Hz)")
 ylabel("Amplitude")
+grid on
